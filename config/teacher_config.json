@@ -1,0 +1,14 @@
+{
+  "backend": "mock",
+  "runtime": {
+    "enabled": true,
+    "runtime_path": "runtime",
+    "server_binary": "runtime/llama-server.exe",
+    "endpoint": "http://127.0.0.1:8080/v1"
+  },
+  "local_model": {
+    "model_path": "models/gpt-oss-20b-heretic-q4_k_m.gguf",
+    "context_size": 8192,
+    "gpu_layers": 999
+  }
+}

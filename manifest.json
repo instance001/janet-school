@@ -1,0 +1,6 @@
+{
+  "module_id": "janet_school",
+  "display_name": "Janet School",
+  "icon": "microscope",
+  "description": "Hosted Janet School research console with ChattyCog bridge status and standalone-owned backend/runtime."
+}

@@ -1,0 +1,29 @@
+# Rust build output
+/target/
+
+# Generated GUI state
+/web/gui-state.json
+
+# Workspace-owned run artifacts
+/data/sessions/*
+!/data/sessions/.gitkeep
+/data/aggregated/*
+!/data/aggregated/.gitkeep
+/compare_exports/*
+!/compare_exports/.gitkeep
+
+# Local model payloads
+/models/*
+!/models/.gitkeep
+
+# Local runtime binaries and logs
+/runtime/*
+!/runtime/.gitkeep
+
+# OS/editor noise
+.DS_Store
+Thumbs.db
+Desktop.ini
+.vscode/
+.idea/
+*.user

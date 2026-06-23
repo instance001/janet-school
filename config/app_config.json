@@ -1,0 +1,16 @@
+{
+  "app_name": "Janet School",
+  "version": "0.1.0",
+  "environment": "local",
+  "docs_dir": "docs",
+  "data_dir": "data",
+  "web_dir": "web",
+  "show_splash": true,
+  "splash_duration_ms": 3000,
+  "session": {
+    "default_run_mode": "smoke",
+    "sessions_dir": "data/sessions",
+    "aggregated_dir": "data/aggregated",
+    "curriculum_size_hint": "smoke"
+  }
+}

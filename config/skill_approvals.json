@@ -1,0 +1,15 @@
+{
+  "approvals_version": "0.1.0",
+  "approved_skill_ids": [
+    "equal_compare",
+    "exact_match_lookup",
+    "first_last_selector",
+    "inside_outside_selector",
+    "left_right_selector",
+    "more_less_compare",
+    "option_match_selector",
+    "ordered_relation_compare",
+    "same_different_compare"
+  ],
+  "blocked_skill_ids": []
+}

@@ -1,0 +1,18 @@
+{
+  "kind": "webview",
+  "auto_launch": true,
+  "title": "Janet School",
+  "url": "http://127.0.0.1:8787",
+  "notes": "Launches the local Janet School GUI server from this module folder, hosts it inside ChattyCog, and keeps bridge status in sync for cross-module context.",
+  "build": {
+    "program": "cargo",
+    "args": ["build"],
+    "cwd": "."
+  },
+  "serve": {
+    "program": "cargo",
+    "args": ["run", "--", "serve-gui", "--host", "127.0.0.1", "--port", "8787", "--no-browser"],
+    "cwd": "."
+  },
+  "serve_wait_ms": 1800
+}

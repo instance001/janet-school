@@ -1,0 +1,7 @@
+{
+  "class_label": "MCM",
+  "deterministic_only": true,
+  "refusal_mode": "strong",
+  "memory_store": "explicit_structured",
+  "policy_version": "0.1.0"
+}

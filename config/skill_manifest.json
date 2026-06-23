@@ -1,0 +1,50 @@
+{
+  "manifest_version": "0.1.0",
+  "skills": [
+    {
+      "skill_id": "exact_match_lookup",
+      "description": "Deterministic lookup for previously approved exact patterns.",
+      "deterministic": true
+    },
+    {
+      "skill_id": "ordered_relation_compare",
+      "description": "Deterministic comparison for simple ordering relations.",
+      "deterministic": true
+    },
+    {
+      "skill_id": "same_different_compare",
+      "description": "Deterministic comparison for explicit same-or-different prompts.",
+      "deterministic": true
+    },
+    {
+      "skill_id": "first_last_selector",
+      "description": "Deterministic selection for explicit first-or-last list prompts.",
+      "deterministic": true
+    },
+    {
+      "skill_id": "more_less_compare",
+      "description": "Deterministic comparison for explicit quantity prompts.",
+      "deterministic": true
+    },
+    {
+      "skill_id": "equal_compare",
+      "description": "Deterministic comparison for explicit equality prompts.",
+      "deterministic": true
+    },
+    {
+      "skill_id": "left_right_selector",
+      "description": "Deterministic spatial neighbor selection for explicit row prompts.",
+      "deterministic": true
+    },
+    {
+      "skill_id": "option_match_selector",
+      "description": "Deterministic selection for explicit sample-to-option matching prompts.",
+      "deterministic": true
+    },
+    {
+      "skill_id": "inside_outside_selector",
+      "description": "Deterministic selection for explicit inside-versus-outside prompts.",
+      "deterministic": true
+    }
+  ]
+}
