@@ -89,6 +89,7 @@ Power-user note:
 6. [docs/ABOUT.md](docs/ABOUT.md)
 7. [docs/ALIGNMENT.md](docs/ALIGNMENT.md)
 8. [docs/SKILL_EXTENSION_GUIDE.md](docs/SKILL_EXTENSION_GUIDE.md)
+9. [GLOSSARY.md](GLOSSARY.md)
 
 ## Release And Handoff
 
