@@ -4,6 +4,7 @@ use anyhow::{Context, Result};
 use clap::{Parser, Subcommand, ValueEnum};
 use tracing::info;
 
+use crate::app_paths;
 use crate::config::{AppConfig, TeacherBackendKind};
 use crate::gui::{GuiShell, serve_gui_bridge, sync_gui_state};
 use crate::mcm::{ExplicitMemoryStore, StudentEngine};
@@ -66,46 +67,50 @@ pub enum Command {
 pub fn run() -> Result<()> {
     crate::util::init_tracing();
     let cli = Cli::parse();
+    let app_root = app_paths::app_root();
+    app_paths::ensure_app_layout(&app_root)
+        .with_context(|| format!("failed to create app folders under {}", app_root.display()))?;
+    let config_dir = app_paths::resolve(&app_root, &cli.config_dir);
 
     match cli.command {
         Command::ValidateConfig => {
-            let config = AppConfig::load_from_dir(&cli.config_dir)?;
+            let config = load_config(&app_root, &config_dir)?;
             println!("{}", serde_json::to_string_pretty(&config)?);
         }
         Command::InitSession { session_name } => {
-            let config = AppConfig::load_from_dir(&cli.config_dir)?;
+            let config = load_config(&app_root, &config_dir)?;
             let service = SessionService::new(config);
             let created = service
                 .initialize_session(session_name)
                 .context("failed to initialize session")?;
-            let config = AppConfig::load_from_dir(&cli.config_dir)?;
-            sync_gui_state(&config, &std::env::current_dir()?)?;
+            let config = load_config(&app_root, &config_dir)?;
+            sync_gui_state(&config, &app_root)?;
             println!("{}", serde_json::to_string_pretty(&created)?);
         }
         Command::GenerateCurriculum {
             session_name,
             teacher_backend,
         } => {
-            let config = load_config_with_override(&cli.config_dir, teacher_backend)?;
+            let config = load_config_with_override(&app_root, &config_dir, teacher_backend)?;
             let service = SessionService::new(config);
             let generated = service
                 .initialize_and_generate_curriculum(session_name)
                 .context("failed to generate curriculum")?;
-            let config = AppConfig::load_from_dir(&cli.config_dir)?;
-            sync_gui_state(&config, &std::env::current_dir()?)?;
+            let config = load_config(&app_root, &config_dir)?;
+            sync_gui_state(&config, &app_root)?;
             println!("{}", serde_json::to_string_pretty(&generated)?);
         }
         Command::RunSession {
             session_name,
             teacher_backend,
         } => {
-            let config = load_config_with_override(&cli.config_dir, teacher_backend)?;
+            let config = load_config_with_override(&app_root, &config_dir, teacher_backend)?;
             let service = SessionService::new(config);
             let completed = service
                 .run_generated_curriculum_session(session_name)
                 .context("failed to run session")?;
-            let config = AppConfig::load_from_dir(&cli.config_dir)?;
-            sync_gui_state(&config, &std::env::current_dir()?)?;
+            let config = load_config(&app_root, &config_dir)?;
+            sync_gui_state(&config, &app_root)?;
             println!("{}", serde_json::to_string_pretty(&completed)?);
         }
         Command::GuiAction {
@@ -113,7 +118,13 @@ pub fn run() -> Result<()> {
             session_name,
             teacher_backend,
         } => {
-            let result = run_gui_action(&cli.config_dir, action, session_name, teacher_backend)?;
+            let result = run_gui_action(
+                &app_root,
+                &config_dir,
+                action,
+                session_name,
+                teacher_backend,
+            )?;
             println!("{}", serde_json::to_string_pretty(&result)?);
         }
         Command::ServeGui {
@@ -124,30 +135,30 @@ pub fn run() -> Result<()> {
             let hosted_by_chattycog =
                 std::env::var("CHATTYCOG_HOSTED").ok().as_deref() == Some("1");
             serve_gui_bridge(
-                &cli.config_dir,
-                &std::env::current_dir()?,
+                &config_dir,
+                &app_root,
                 &host,
                 port,
                 !no_browser && !hosted_by_chattycog,
             )?;
         }
         Command::SyncGuiState => {
-            let config = AppConfig::load_from_dir(&cli.config_dir)?;
-            let state = sync_gui_state(&config, &std::env::current_dir()?)?;
+            let config = load_config(&app_root, &config_dir)?;
+            let state = sync_gui_state(&config, &app_root)?;
             println!("{}", serde_json::to_string_pretty(&state)?);
         }
         Command::InspectRuntime => {
-            let config = AppConfig::load_from_dir(&cli.config_dir)?;
+            let config = load_config(&app_root, &config_dir)?;
             let runtime = config.teacher.runtime_descriptor();
             println!("{}", serde_json::to_string_pretty(&runtime)?);
         }
         Command::PrintGuiShell => {
-            let shell = GuiShell::from_workspace(std::env::current_dir()?);
+            let shell = GuiShell::from_workspace(app_root.clone());
             info!("prepared GUI shell metadata");
             println!("{}", serde_json::to_string_pretty(&shell)?);
         }
         Command::RunMcmPrompt { prompt } => {
-            let config = AppConfig::load_from_dir(&cli.config_dir)?;
+            let config = load_config(&app_root, &config_dir)?;
             let engine = StudentEngine::new(
                 config.mcm,
                 config.skill_manifest,
@@ -196,11 +207,17 @@ pub enum GuiActionArg {
     StopRun,
 }
 
+fn load_config(app_root: &std::path::Path, config_dir: &std::path::Path) -> Result<AppConfig> {
+    let config = AppConfig::load_from_dir(config_dir)?;
+    Ok(config.resolved_against(app_root))
+}
+
 fn load_config_with_override(
+    app_root: &std::path::Path,
     config_dir: &std::path::Path,
     teacher_backend: Option<TeacherBackendArg>,
 ) -> Result<AppConfig> {
-    let mut config = AppConfig::load_from_dir(config_dir)?;
+    let mut config = load_config(app_root, config_dir)?;
     if let Some(backend) = teacher_backend {
         config.teacher.backend = backend.into_config_kind();
     }
@@ -208,6 +225,7 @@ fn load_config_with_override(
 }
 
 fn run_gui_action(
+    app_root: &std::path::Path,
     config_dir: &std::path::Path,
     action: GuiActionArg,
     session_name: Option<String>,
@@ -215,28 +233,28 @@ fn run_gui_action(
 ) -> Result<serde_json::Value> {
     match action {
         GuiActionArg::SyncState => {
-            let config = AppConfig::load_from_dir(config_dir)?;
-            let state = sync_gui_state(&config, &std::env::current_dir()?)?;
+            let config = load_config(app_root, config_dir)?;
+            let state = sync_gui_state(&config, app_root)?;
             Ok(serde_json::to_value(state)?)
         }
         GuiActionArg::GenerateCurriculum => {
-            let config = load_config_with_override(config_dir, teacher_backend)?;
+            let config = load_config_with_override(app_root, config_dir, teacher_backend)?;
             let service = SessionService::new(config);
             let generated = service
                 .initialize_and_generate_curriculum(session_name)
                 .context("failed to generate curriculum from gui action")?;
-            let config = AppConfig::load_from_dir(config_dir)?;
-            sync_gui_state(&config, &std::env::current_dir()?)?;
+            let config = load_config(app_root, config_dir)?;
+            sync_gui_state(&config, app_root)?;
             Ok(serde_json::to_value(generated)?)
         }
         GuiActionArg::RunSession => {
-            let config = load_config_with_override(config_dir, teacher_backend)?;
+            let config = load_config_with_override(app_root, config_dir, teacher_backend)?;
             let service = SessionService::new(config);
             let completed = service
                 .run_generated_curriculum_session(session_name)
                 .context("failed to run session from gui action")?;
-            let config = AppConfig::load_from_dir(config_dir)?;
-            sync_gui_state(&config, &std::env::current_dir()?)?;
+            let config = load_config(app_root, config_dir)?;
+            sync_gui_state(&config, app_root)?;
             Ok(serde_json::to_value(completed)?)
         }
         GuiActionArg::StopRun => Err(anyhow::anyhow!(

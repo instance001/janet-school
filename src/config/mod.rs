@@ -33,6 +33,33 @@ impl AppConfig {
             skill_approvals,
         })
     }
+
+    pub fn resolved_against(mut self, root: &Path) -> Self {
+        self.app.docs_dir = resolve_path_string(root, &self.app.docs_dir);
+        self.app.data_dir = resolve_path_string(root, &self.app.data_dir);
+        self.app.web_dir = resolve_path_string(root, &self.app.web_dir);
+        self.session.sessions_dir = resolve_path_string(root, &self.session.sessions_dir);
+        self.session.aggregated_dir = resolve_path_string(root, &self.session.aggregated_dir);
+        self.app.session = self.session.clone();
+        self.teacher.runtime.runtime_path =
+            resolve_path_string(root, &self.teacher.runtime.runtime_path);
+        self.teacher.runtime.server_binary =
+            resolve_path_string(root, &self.teacher.runtime.server_binary);
+        self.teacher.local_model.model_path =
+            resolve_path_string(root, &self.teacher.local_model.model_path);
+        self
+    }
+}
+
+fn resolve_path_string(root: &Path, value: &str) -> String {
+    let path = PathBuf::from(value);
+    if path.is_absolute() {
+        path
+    } else {
+        root.join(path)
+    }
+    .display()
+    .to_string()
 }
 
 pub fn write_skill_approvals(dir: &Path, approvals: &SkillApprovals) -> Result<()> {

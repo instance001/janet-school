@@ -1,6 +1,6 @@
 # Janet School Unfinished Checklist
 
-This checklist tracks the meaningful remaining work from the original build outline in [build-plan-fox-codex.md](C:/Users/User/Desktop/github_portal/janet-school/build-plan-fox-codex.md).
+This checklist tracks the meaningful remaining work from the original build outline in [build-plan-fox-codex.md](../build-plan-fox-codex.md).
 
 It is intentionally focused on unfinished or partially finished items, not work that is already substantially complete.
 
@@ -16,7 +16,7 @@ It is intentionally focused on unfinished or partially finished items, not work 
 ## Notes
 
 - Phase 0 through Phase 6 are substantially implemented in foundation form.
-- Full curriculum generation now reaches the original target shape in [src/curriculum/mod.rs](C:/Users/User/Desktop/github_portal/janet-school/src/curriculum/mod.rs):
+- Full curriculum generation now reaches the original target shape in [src/curriculum/mod.rs](../src/curriculum/mod.rs):
   - 12 domains
   - 5 concepts per domain
   - 5 teaching items per concept
@@ -34,6 +34,6 @@ It is intentionally focused on unfinished or partially finished items, not work 
   - curriculum generation from a ready local endpoint
   - clean failure when the endpoint is unavailable and runtime launch is disabled
   - session artifact logging for a local-teacher-backed run
-- The Windows standalone acceptance pass now has a dedicated run sheet in [WINDOWS_ACCEPTANCE.md](C:/Users/User/Desktop/github_portal/janet-school/docs/WINDOWS_ACCEPTANCE.md).
+- The Windows standalone acceptance pass now has a dedicated run sheet in [WINDOWS_ACCEPTANCE.md](WINDOWS_ACCEPTANCE.md).
 - The remaining work is mostly about:
   - optional later compatibility/export work beyond v0.1

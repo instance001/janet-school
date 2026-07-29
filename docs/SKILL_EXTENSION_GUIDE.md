@@ -28,15 +28,15 @@ A skill is not:
 
 The current extension surface spans a few places:
 
-- [src/mcm/mod.rs](C:/Users/User/Desktop/github_portal/janet-school/src/mcm/mod.rs)
+- [src/mcm/mod.rs](../src/mcm/mod.rs)
   Skill matching, execution, trace generation, and unit tests.
-- [config/skill_manifest.json](C:/Users/User/Desktop/github_portal/janet-school/config/skill_manifest.json)
+- [config/skill_manifest.json](../config/skill_manifest.json)
   Declares which skills exist.
-- [config/skill_approvals.json](C:/Users/User/Desktop/github_portal/janet-school/config/skill_approvals.json)
+- [config/skill_approvals.json](../config/skill_approvals.json)
   Declares which skills are allowed for runs.
-- [src/session/mod.rs](C:/Users/User/Desktop/github_portal/janet-school/src/session/mod.rs)
+- [src/session/mod.rs](../src/session/mod.rs)
   Converts MCM traces into session artifacts and skill events.
-- [src/skills/mod.rs](C:/Users/User/Desktop/github_portal/janet-school/src/skills/mod.rs)
+- [src/skills/mod.rs](../src/skills/mod.rs)
   Defines the `SkillEvent` output shape.
 
 The important thing to understand is this:
@@ -76,7 +76,7 @@ Good deterministic skills have a crisp envelope. They are boring in a good way.
 
 The MCM engine classifies prompt surface features before matching candidate skills.
 
-That happens in [src/mcm/mod.rs](C:/Users/User/Desktop/github_portal/janet-school/src/mcm/mod.rs).
+That happens in [src/mcm/mod.rs](../src/mcm/mod.rs).
 
 When adding a new skill, check whether the prompt family already maps cleanly to an existing feature label. If not, add a new one.
 
@@ -94,7 +94,7 @@ It is only a candidate stage. Approval and execution come later.
 
 ## Step 4: Add The Deterministic Execution Function
 
-The current skills are implemented as helper functions in [src/mcm/mod.rs](C:/Users/User/Desktop/github_portal/janet-school/src/mcm/mod.rs).
+The current skills are implemented as helper functions in [src/mcm/mod.rs](../src/mcm/mod.rs).
 
 Follow the existing pattern:
 
@@ -124,7 +124,7 @@ Keep the language specific. The trace should make sense to a future reviewer who
 
 ## Step 6: Register The Skill In The Manifest
 
-Add a new entry to [config/skill_manifest.json](C:/Users/User/Desktop/github_portal/janet-school/config/skill_manifest.json).
+Add a new entry to [config/skill_manifest.json](../config/skill_manifest.json).
 
 Every entry needs:
 
@@ -146,7 +146,7 @@ If the manifest is missing the skill, the config will not truthfully represent t
 
 ## Step 7: Decide Approval Posture
 
-Decide whether the skill should be approved by default in [config/skill_approvals.json](C:/Users/User/Desktop/github_portal/janet-school/config/skill_approvals.json).
+Decide whether the skill should be approved by default in [config/skill_approvals.json](../config/skill_approvals.json).
 
 Questions to ask:
 
@@ -160,8 +160,8 @@ If the answer is not clear, do not approve it by default yet. Let it be opt-in t
 
 There are two important fixture surfaces:
 
-- the unit test engine setup in [src/mcm/mod.rs](C:/Users/User/Desktop/github_portal/janet-school/src/mcm/mod.rs)
-- the session test config helper in [src/session/mod.rs](C:/Users/User/Desktop/github_portal/janet-school/src/session/mod.rs)
+- the unit test engine setup in [src/mcm/mod.rs](../src/mcm/mod.rs)
+- the session test config helper in [src/session/mod.rs](../src/session/mod.rs)
 
 Both currently include explicit lists of known skill IDs.
 
@@ -176,7 +176,7 @@ At minimum, add tests for:
 - refusal or partial-attempt behavior on an unresolved edge case if applicable
 - stability across repeated identical inputs if the new path adds any complexity
 
-Follow the existing tests in [src/mcm/mod.rs](C:/Users/User/Desktop/github_portal/janet-school/src/mcm/mod.rs) as the model.
+Follow the existing tests in [src/mcm/mod.rs](../src/mcm/mod.rs) as the model.
 
 The minimum confidence bar is:
 

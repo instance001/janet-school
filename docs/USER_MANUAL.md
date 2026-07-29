@@ -97,7 +97,7 @@ Change into the project root folder.
 Example:
 
 ```powershell
-cd C:\path\to\janet-school
+cd C:\path\to\your\janet-school
 ```
 
 ### Step 2: Check That The Config Loads

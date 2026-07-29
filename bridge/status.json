@@ -1,29 +1,18 @@
 {
   "module_id": "janet_school",
-  "summary": "Janet School latest run 63429b04 uses mock, completed 30 items, logged 0 refusals, and surfaced 0 anomaly flags.",
-  "snapshot": "# Janet School Snapshot\n\n- Version: 0.1.0\n- Backend mode: headless_capable\n- Active teacher backend: mock\n- Configured teacher backend: mock\n- Skill approvals: 9/9\n- Runtime endpoint: http://127.0.0.1:8080/v1\n- Runtime ready: no\n- Runtime binary present: yes\n- Teacher model present: yes\n\n## Latest Session\n- Run id: 63429b04-6a45-42e9-9824-40b71c40e126\n- Completed at: 2026-06-23T02:17:00.346702800+00:00\n- Skill profile: all skills (9/9)\n- Accuracy: 100%\n- Refusals: 0\n- Anomaly flags: 0\n- Confirmed/boundary/emergent: 6/0/0\n\n## Teacher Snapshot\n- Teacher latency: 0 ms\n- Teacher endpoint ready: no\n- Teacher launched runtime: no\n- Teacher domains: n/a\n\n## Artifacts\n- Analysis Report (Markdown): analysis_report.md\n- Analysis Report (JSON): analysis_report.json\n- Session Summary: session_summary.json\n- Curriculum Generated: curriculum_generated.jsonl\n- Teacher Calls: teacher_calls.jsonl\n- Telemetry: telemetry.jsonl",
-  "event_type": "suspend_rundown",
+  "summary": "Janet School has not published a runtime snapshot yet.",
+  "snapshot": "# Janet School Snapshot\n\nNo local session snapshot has been published yet.",
+  "event_type": "idle",
   "tags": [
     "janet_school",
     "research",
     "mcm",
-    "telemetry",
-    "latest_session"
+    "telemetry"
   ],
   "payload": {
     "app_name": "Janet School",
-    "approved_skill_count": 9,
-    "backend_mode": "headless_capable",
-    "configured_teacher_backend": "mock",
-    "has_latest_session": true,
-    "latest_accuracy": "100%",
-    "latest_anomaly_flag_count": 0,
-    "latest_completed_at": "2026-06-23T02:17:00.346702800+00:00",
-    "latest_refusal_count": 0,
-    "latest_run_id": "63429b04-6a45-42e9-9824-40b71c40e126",
-    "teacher_backend": "mock",
-    "total_skill_count": 9,
+    "has_latest_session": false,
     "version": "0.1.0"
   },
-  "updated_at_unix_ms": 1782185993175
+  "updated_at_unix_ms": 0
 }

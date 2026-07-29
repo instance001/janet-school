@@ -3,6 +3,7 @@
 
 # Generated GUI state
 /web/gui-state.json
+/bridge/status.json
 
 # Workspace-owned run artifacts
 /data/sessions/*

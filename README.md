@@ -46,6 +46,12 @@ If Janet School is launched from ChattyCog as a hosted module, the GUI server st
 
 If you want a formal pass/fail machine check instead of a quick start, use [docs/WINDOWS_ACCEPTANCE.md](docs/WINDOWS_ACCEPTANCE.md).
 
+## Storage Layout
+
+Janet School uses an active app root for config, runtime, session data, web assets, bridge state, models, and compare exports. Source runs use the repository folder. Packaged executable runs use the executable's folder. Set `JANET_SCHOOL_BASE_PATH` to force a portable root for testing, hosted launches, or custom installs.
+
+On first run the app creates the writable folders it needs, including `config/`, `data/sessions/`, `data/aggregated/`, `compare_exports/`, `models/`, `runtime/`, `bridge/`, and `web/`. Release bundles should ship the default `config/`, `web/`, and `assets/` folders beside the executable.
+
 ## Main Commands
 
 - `cargo run -- validate-config`

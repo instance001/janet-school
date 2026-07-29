@@ -413,6 +413,10 @@ pub fn sync_gui_state(config: &AppConfig, workspace_root: &Path) -> Result<GuiSt
     Ok(state)
 }
 
+fn load_gui_config(config_dir: &Path, workspace_root: &Path) -> Result<AppConfig> {
+    Ok(AppConfig::load_from_dir(config_dir)?.resolved_against(workspace_root))
+}
+
 pub fn serve_gui_bridge(
     config_dir: &Path,
     workspace_root: &Path,
@@ -493,7 +497,7 @@ fn handle_http_request(
 
     match (method, url.as_str()) {
         (Method::Get, "/api/state") => {
-            let config = AppConfig::load_from_dir(&config_dir)?;
+            let config = load_gui_config(&config_dir, &workspace_root)?;
             let state = with_live_bridge_state(sync_gui_state(&config, &workspace_root)?);
             respond_json(request, StatusCode(200), &state)
         }
@@ -513,13 +517,13 @@ fn handle_http_request(
         }
         (Method::Post, "/api/session-export") => {
             let payload = read_json_body::<GuiSessionExportRequest>(request.as_reader())?;
-            let config = AppConfig::load_from_dir(&config_dir)?;
+            let config = load_gui_config(&config_dir, &workspace_root)?;
             let saved = save_session_export_bundle(&workspace_root, &config, payload)?;
             respond_json(request, StatusCode(201), &saved)
         }
         (Method::Post, "/api/open-session-folder") => {
             let payload = read_json_body::<GuiSessionExportRequest>(request.as_reader())?;
-            let config = AppConfig::load_from_dir(&config_dir)?;
+            let config = load_gui_config(&config_dir, &workspace_root)?;
             let opened = open_session_folder(&config, payload)?;
             respond_json(request, StatusCode(200), &opened)
         }
@@ -539,12 +543,12 @@ fn handle_http_request(
             serve_asset_file(request, &workspace_root, &url)
         }
         (Method::Get, "/gui-state.json") => {
-            let config = AppConfig::load_from_dir(&config_dir)?;
+            let config = load_gui_config(&config_dir, &workspace_root)?;
             let state = with_live_bridge_state(sync_gui_state(&config, &workspace_root)?);
             respond_json(request, StatusCode(200), &state)
         }
         (Method::Get, _) if url.starts_with("/artifacts/") => {
-            serve_session_artifact(request, &config_dir, &url)
+            serve_session_artifact(request, &config_dir, &workspace_root, &url)
         }
         (Method::Get, _) if url.starts_with("/compare-exports/") => {
             serve_compare_export(request, &workspace_root, &url)
@@ -568,34 +572,34 @@ fn execute_gui_action_request(
 ) -> Result<serde_json::Value> {
     match payload.action.as_str() {
         "sync_state" => {
-            let config = AppConfig::load_from_dir(config_dir)?;
+            let config = load_gui_config(config_dir, workspace_root)?;
             let state = sync_gui_state(&config, workspace_root)?;
             Ok(serde_json::to_value(state)?)
         }
         "save_setup" => {
-            let config = persist_setup_overrides(config_dir, payload)?;
+            let config = persist_setup_overrides(config_dir, workspace_root, payload)?;
             let state = sync_gui_state(&config, workspace_root)?;
             Ok(serde_json::to_value(state)?)
         }
         "generate_curriculum" => {
-            let config = load_config_with_overrides(config_dir, &payload)?;
+            let config = load_config_with_overrides(config_dir, workspace_root, &payload)?;
             let service = SessionService::new(config);
             let generated = service.initialize_and_generate_curriculum(payload.session_name)?;
-            let config = AppConfig::load_from_dir(config_dir)?;
+            let config = load_gui_config(config_dir, workspace_root)?;
             sync_gui_state(&config, workspace_root)?;
             Ok(serde_json::to_value(generated)?)
         }
         "run_session" => {
-            let config = load_config_with_overrides(config_dir, &payload)?;
+            let config = load_config_with_overrides(config_dir, workspace_root, &payload)?;
             let service = SessionService::new(config);
             let completed = service.run_generated_curriculum_session(payload.session_name)?;
-            let config = AppConfig::load_from_dir(config_dir)?;
+            let config = load_gui_config(config_dir, workspace_root)?;
             sync_gui_state(&config, workspace_root)?;
             Ok(serde_json::to_value(completed)?)
         }
         "update_skill_approvals" => {
             let updated = update_skill_approvals(config_dir, payload.selected_skill_ids.unwrap_or_default())?;
-            let config = AppConfig::load_from_dir(config_dir)?;
+            let config = load_gui_config(config_dir, workspace_root)?;
             sync_gui_state(&config, workspace_root)?;
             Ok(serde_json::to_value(updated)?)
         }
@@ -854,15 +858,15 @@ fn build_bridge_status(runtime_state: &Arc<Mutex<BridgeRuntimeState>>) -> Result
 }
 
 fn summarize_action_result(value: &serde_json::Value) -> String {
-    if let Some(completion_status) = value.get("completion_status").and_then(|entry| entry.as_str()) {
-        if completion_status == "stopped" {
-            let total = value
-                .get("run_stats")
-                .and_then(|stats| stats.get("total_items"))
-                .and_then(|count| count.as_u64())
-                .unwrap_or(0);
-            return format!("run stopped after {} items; partial artifacts were preserved", total);
-        }
+    if let Some(completion_status) = value.get("completion_status").and_then(|entry| entry.as_str())
+        && completion_status == "stopped"
+    {
+        let total = value
+            .get("run_stats")
+            .and_then(|stats| stats.get("total_items"))
+            .and_then(|count| count.as_u64())
+            .unwrap_or(0);
+        return format!("run stopped after {} items; partial artifacts were preserved", total);
     }
 
     if let Some(run_stats) = value.get("run_stats") {
@@ -916,7 +920,7 @@ fn execute_gui_action_request_with_progress<F>(
     config_dir: &Path,
     workspace_root: &Path,
     payload: GuiActionRequest,
-    mut run_control: impl FnMut() -> RunControlSignal,
+    run_control: impl FnMut() -> RunControlSignal,
     mut on_progress: F,
 ) -> Result<serde_json::Value>
 where
@@ -925,18 +929,18 @@ where
     match payload.action.as_str() {
         "sync_state" => execute_gui_action_request(config_dir, workspace_root, payload),
         "generate_curriculum" => {
-            let config = load_config_with_overrides(config_dir, &payload)?;
+            let config = load_config_with_overrides(config_dir, workspace_root, &payload)?;
             let service = SessionService::new(config);
             let generated =
                 service.initialize_and_generate_curriculum_with_progress(payload.session_name, |progress| {
                     on_progress(progress);
                 })?;
-            let config = AppConfig::load_from_dir(config_dir)?;
+            let config = load_gui_config(config_dir, workspace_root)?;
             sync_gui_state(&config, workspace_root)?;
             Ok(serde_json::to_value(generated)?)
         }
         "run_session" => {
-            let config = load_config_with_overrides(config_dir, &payload)?;
+            let config = load_config_with_overrides(config_dir, workspace_root, &payload)?;
             let service = SessionService::new(config);
             let completed =
                 service.run_generated_curriculum_session_with_control(
@@ -944,9 +948,9 @@ where
                     |progress| {
                         on_progress(progress);
                     },
-                    || run_control(),
+                    run_control,
                 )?;
-            let config = AppConfig::load_from_dir(config_dir)?;
+            let config = load_gui_config(config_dir, workspace_root)?;
             sync_gui_state(&config, workspace_root)?;
             Ok(serde_json::to_value(completed)?)
         }
@@ -954,10 +958,14 @@ where
     }
 }
 
-fn load_config_with_overrides(config_dir: &Path, payload: &GuiActionRequest) -> Result<AppConfig> {
-    let mut config = AppConfig::load_from_dir(config_dir)?;
+fn load_config_with_overrides(
+    config_dir: &Path,
+    workspace_root: &Path,
+    payload: &GuiActionRequest,
+) -> Result<AppConfig> {
+    let mut config = load_gui_config(config_dir, workspace_root)?;
     apply_setup_overrides(&mut config, payload)?;
-    Ok(config)
+    Ok(config.resolved_against(workspace_root))
 }
 
 fn apply_setup_overrides(config: &mut AppConfig, payload: &GuiActionRequest) -> Result<()> {
@@ -989,12 +997,16 @@ fn apply_setup_overrides(config: &mut AppConfig, payload: &GuiActionRequest) -> 
     Ok(())
 }
 
-fn persist_setup_overrides(config_dir: &Path, payload: GuiActionRequest) -> Result<AppConfig> {
+fn persist_setup_overrides(
+    config_dir: &Path,
+    workspace_root: &Path,
+    payload: GuiActionRequest,
+) -> Result<AppConfig> {
     let mut config = AppConfig::load_from_dir(config_dir)?;
     apply_setup_overrides(&mut config, &payload)?;
     write_app_metadata(config_dir, &config.app)?;
     write_teacher_config(config_dir, &config.teacher)?;
-    Ok(config)
+    Ok(config.resolved_against(workspace_root))
 }
 
 fn parse_teacher_backend(value: &str) -> Result<TeacherBackendKind> {
@@ -1037,8 +1049,13 @@ fn serve_static_file(request: Request, path: PathBuf, content_type: &str) -> Res
     Ok(())
 }
 
-fn serve_session_artifact(request: Request, config_dir: &Path, url: &str) -> Result<()> {
-    let config = AppConfig::load_from_dir(config_dir)?;
+fn serve_session_artifact(
+    request: Request,
+    config_dir: &Path,
+    workspace_root: &Path,
+    url: &str,
+) -> Result<()> {
+    let config = load_gui_config(config_dir, workspace_root)?;
     let Some(path) = resolve_artifact_request_path(&config, url)? else {
         return respond_text(request, StatusCode(404), "artifact not found", "text/plain; charset=utf-8");
     };

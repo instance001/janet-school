@@ -2,6 +2,7 @@
 
 mod analysis;
 mod app;
+mod app_paths;
 mod config;
 mod curriculum;
 mod gui;
