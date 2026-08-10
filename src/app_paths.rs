@@ -1,6 +1,19 @@
 use std::path::{Path, PathBuf};
 
 const APP_ROOT_ENV: &str = "JANET_SCHOOL_BASE_PATH";
+pub const APP_LAYOUT_DIRS: &[&str] = &[
+    "assets",
+    "bridge",
+    "compare_exports",
+    "config",
+    "data",
+    "data/aggregated",
+    "data/sessions",
+    "models",
+    "runtime",
+    "runtime/windows",
+    "web",
+];
 
 pub fn app_root() -> PathBuf {
     if let Some(path) = std::env::var_os(APP_ROOT_ENV)
@@ -42,20 +55,21 @@ pub fn resolve(root: &Path, value: impl AsRef<Path>) -> PathBuf {
 }
 
 pub fn ensure_app_layout(root: &Path) -> std::io::Result<()> {
-    for relative in [
-        "config",
-        "data",
-        "data/sessions",
-        "data/aggregated",
-        "compare_exports",
-        "models",
-        "runtime",
-        "bridge",
-        "web",
-    ] {
-        std::fs::create_dir_all(root.join(relative))?;
+    std::fs::create_dir_all(root)?;
+    for relative in APP_LAYOUT_DIRS {
+        std::fs::create_dir_all(app_layout_path(root, relative))?;
     }
     Ok(())
+}
+
+pub fn app_layout_path(root: &Path, relative: &str) -> PathBuf {
+    let mut path = root.to_path_buf();
+    for component in relative.split('/') {
+        if !component.is_empty() {
+            path.push(component);
+        }
+    }
+    path
 }
 
 fn find_source_root(start: &Path) -> Option<PathBuf> {
@@ -72,4 +86,42 @@ fn is_source_root(path: &Path) -> bool {
         && path.join("src").join("main.rs").exists()
         && path.join("config").join("app_config.json").exists()
         && path.join("web").join("index.html").exists()
+}
+
+#[cfg(test)]
+mod tests {
+    use std::{
+        fs,
+        path::PathBuf,
+        time::{SystemTime, UNIX_EPOCH},
+    };
+
+    use super::{APP_LAYOUT_DIRS, app_layout_path, ensure_app_layout};
+
+    fn temp_dir(label: &str) -> PathBuf {
+        let unique = SystemTime::now()
+            .duration_since(UNIX_EPOCH)
+            .unwrap()
+            .as_nanos();
+        std::env::temp_dir().join(format!("janet-school-app-paths-{label}-{unique}"))
+    }
+
+    #[test]
+    fn ensure_app_layout_bootstraps_binary_first_run_layout() {
+        let root = temp_dir("first-run-layout");
+
+        ensure_app_layout(&root).unwrap();
+
+        assert!(root.is_dir());
+        for relative in APP_LAYOUT_DIRS {
+            let path = app_layout_path(&root, relative);
+            assert!(
+                path.is_dir(),
+                "expected first-run folder {} to exist",
+                path.display()
+            );
+        }
+
+        fs::remove_dir_all(root).unwrap();
+    }
 }
