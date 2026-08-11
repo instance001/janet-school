@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Janet School</title>
+    <link rel="stylesheet" href="styles.css" />
+  </head>
+  <body>
+    <div id="startup-splash" class="startup-splash" aria-live="polite">
+      <div class="startup-splash__card">
+        <img id="startup-splash-logo" class="startup-splash__logo" src="/assets/fmi-splash-wordmark.png" alt="Fractal Media Infrastructure" />
+        <p class="startup-splash__label">Fractal Media Infrastructure</p>
+      </div>
+    </div>
+    <div id="ui-tooltip" class="ui-tooltip" role="tooltip" aria-hidden="true"></div>
+    <main class="shell shell--startup-hidden" id="app-shell">
+      <section class="hero">
+        <p class="eyebrow">Janet School</p>
+        <h1>Research Console Shell</h1>
+        <p class="lede">
+          Backend-driven shell for the standalone Janet School rig. The Rust
+          backend writes the session state and analysis artifacts; this shell only
+          renders them.
+        </p>
+        <div class="hero-meta" id="hero-meta"></div>
+      </section>
+      <section class="grid">
+        <article id="control-card">
+          <h2>Controls</h2>
+          <p class="muted">Bridge-ready action surface owned by the Rust backend.</p>
+          <div class="detail" id="control-detail"></div>
+        </article>
+        <article id="setup-card">
+          <h2>Setup</h2>
+          <p class="muted">Teacher backend, run mode, and session path.</p>
+          <div class="detail" id="setup-detail"></div>
+        </article>
+        <article id="curriculum-card">
+          <h2>Curriculum</h2>
+          <p class="muted">Generated domains, concepts, item counts, and probes.</p>
+          <div class="detail" id="curriculum-detail"></div>
+        </article>
+        <article id="run-card">
+          <h2>Run</h2>
+          <p class="muted">Outcome stats for the latest completed session.</p>
+          <div class="detail" id="run-detail"></div>
+        </article>
+        <article id="live-job-card">
+          <h2>Live Host Job</h2>
+          <p class="muted">Current host-side action progress and session execution details.</p>
+          <div class="detail" id="live-job-detail"></div>
+        </article>
+        <article id="telemetry-card">
+          <h2>Telemetry</h2>
+          <p class="muted">Memory, refusals, anomalies, and analysis snapshot.</p>
+          <div class="detail" id="telemetry-detail"></div>
+        </article>
+        <article id="analysis-card">
+          <h2>Analysis</h2>
+          <p class="muted">Conservative post-run findings, cautions, and next probes.</p>
+          <div class="detail" id="analysis-detail"></div>
+        </article>
+        <article id="export-card">
+          <h2>Export</h2>
+          <p class="muted">Session folder visibility and artifact download surface.</p>
+          <div class="detail" id="export-detail"></div>
+        </article>
+        <article id="about-card">
+          <h2>About</h2>
+          <p class="muted">Project identity, stewardship, source home, and license posture.</p>
+          <div class="detail" id="about-detail"></div>
+        </article>
+      </section>
+      <section class="recent">
+        <h2>Recent Sessions</h2>
+        <div id="recent-sessions" class="recent-list"></div>
+      </section>
+      <section class="recent">
+        <h2>Compare Runs</h2>
+        <div id="compare-sessions" class="detail"></div>
+      </section>
+      <footer class="legal-notice">
+        <p><strong>Publisher/steward:</strong> Fractal Media Infrastructure</p>
+        <p><strong>GitHub:</strong> Instance001</p>
+        <p><strong>License:</strong> AGPL-3.0-or-later</p>
+        <p>Janet School is published under Fractal Media Infrastructure, a small independent research-and-development umbrella for open-source AI tooling, cognitive scaffolding experiments, and local-first research systems.</p>
+        <p>Public GitHub work is currently maintained under Instance001. Media, demos, and outreach may appear through separate channels over time.</p>
+        <p>This program is free software: you can redistribute it and/or modify it under the terms of the GNU Affero General Public License as published by the Free Software Foundation, either version 3 of the License, or (at your option) any later version.</p>
+        <p>This program is distributed without any warranty. You should have received a copy of the GNU Affero General Public License along with this program. In this workspace, see the project root <code>LICENSE</code> file and corresponding source code.</p>
+      </footer>
+    </main>
+    <script src="bridge.js"></script>
+    <script src="app.js"></script>
+  </body>
+</html>
