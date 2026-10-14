@@ -32,3 +32,7 @@ GitHub API licence field at inventory time: `AGPL-3.0`. This is a metadata obser
 ## Evidence and limitations
 
 Evidence: authenticated GitHub API metadata captured by the FMI provenance audit. Contribution, prior art, ownership, contributors, document licensing, relationships, releases, and publication status require human verification.
+
+## Evidence-led lineage position
+
+The README supports `EXPERIMENTAL`: Janet School is a controlled Rust research rig for a deterministic MCM student, generated curricula, telemetry, and conservative analysis. It is distinct from the historical Janet School exploratory build, which preserves earlier work. Neither repository establishes consciousness, clinical validity, general intelligence, or abstraction from a single run.
